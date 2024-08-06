@@ -22,7 +22,7 @@ func Initialize(db *gorm.DB, productRepo repositories.ProductRepository) {
 	configs := NewWorkerConfigs(productRepo)
 
 	for _, config := range configs {
-		workers[config.Name] = New(config.Name, config.Interval, config.OnTick)
+		workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
 	}
 
 	StartAll()
