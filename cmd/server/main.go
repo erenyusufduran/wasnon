@@ -22,8 +22,8 @@ func main() {
 
 	db := database.Init()
 
-	productRepo := repositories.NewGormProductRepository(db)
-	companyRepo := repositories.NewGormCompanyRepository(db)
+	productRepo := repositories.NewProductRepositoryImpl(db)
+	companyRepo := repositories.NewCompanyRepositoryImpl(db)
 
 	e := server.Initialize(db, productRepo, companyRepo)
 	workers.Initialize(db, productRepo)
