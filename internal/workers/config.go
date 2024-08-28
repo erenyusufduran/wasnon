@@ -1,6 +1,7 @@
 package workers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/erenyusufduran/wasnon/internal/repositories"
@@ -14,36 +15,42 @@ type WorkerConfig struct {
 }
 
 // NewConfigs creates worker configurations for initialization
-func NewWorkerConfigs(repo repositories.ProductRepository) []WorkerConfig {
+func NewWorkerConfigs(repositories *repositories.Repositories) []WorkerConfig {
 	return []WorkerConfig{
 		{
 			Name: "product",
 			Schedule: func() time.Duration {
-				return scheduleByMinute(1)
+				return schedule(15, time.Second)
 			},
 			OnTick: func() {
-				disableExpiredProducts(repo)
+				err := disableExpiredProducts(repositories.ProductRepository)
+				if err != nil {
+					fmt.Println("There is an error at disableExpiredProducts job")
+				}
+				fmt.Println("Finished product scheduler")
 			},
 		},
 		{
 			Name: "log",
 			Schedule: func() time.Duration {
-				return scheduleSpecificTime(1, 38)
+				return scheduleSpecificTime(12, 38)
 			}, OnTick: func() {
-				cleanupLogs()
+				err := cleanupLogs()
+				if err != nil {
+					fmt.Println("There is an error at cleanupLogs job")
+				}
 			},
 		},
 	}
 }
 
-// scheduleEveryMinute returns a duration of 1 minute
-func scheduleByMinute(minute uint) time.Duration {
-	return time.Duration(minute) * time.Minute
-}
-
-// scheduleEveryHour returns a duration of 1 hour
-func scheduleByHour(hour uint) time.Duration {
-	return time.Duration(hour) * time.Hour
+/* schedule every sec, minute, hours
+ * schedule(30, time.Second)
+ * schedule(2, time.Minute)
+ * schedule(2, time.Hour)
+ */
+func schedule(hour uint, t time.Duration) time.Duration {
+	return time.Duration(hour) * t
 }
 
 // scheduleSpecificTime returns the duration until the next occurrence of a specific time of day
