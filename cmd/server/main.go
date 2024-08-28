@@ -1,63 +1,30 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-
-	"github.com/erenyusufduran/wasnon/internal/config"
-	"github.com/erenyusufduran/wasnon/internal/database"
-	"github.com/erenyusufduran/wasnon/internal/repositories"
-	"github.com/erenyusufduran/wasnon/internal/server"
-	"github.com/erenyusufduran/wasnon/internal/workers"
-	"github.com/labstack/echo/v4"
 )
 
+// go run ./cmd/server
 func main() {
-	config.Load()
+	// Initialize the application components
+	app := Initialize()
 
-	db := database.Init()
-
-	productRepo := repositories.NewProductRepositoryImpl(db)
-	companyRepo := repositories.NewCompanyRepositoryImpl(db)
-
-	e := server.Initialize(db, productRepo, companyRepo)
-	workers.Initialize(db, productRepo)
-
-	startServer(e)
-}
-
-func startServer(e *echo.Echo) {
-	// Run server in a goroutine so that it doesn't block the graceful shutdown handling
+	// Start the server in a separate goroutine to catch gracefully shutdown
 	go func() {
-		port := os.Getenv("PORT")
-		if port == "" {
-			port = "8080"
-		}
-		log.Printf("Starting server on port %s", port)
-		if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatal("Shutting down the server")
+		if err := app.StartServer(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Failed to start the server: %v", err)
 		}
 	}()
 
+	// Wait for an interrupt signal to gracefully shutdown the server
 	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-shutdown
 	log.Println("Shutting down server...")
 
-	workers.StopAll()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := e.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
-	}
-
-	database.Close()
-	log.Println("Server exiting")
+	app.Shutdown()
 }
