@@ -8,7 +8,7 @@ import (
 
 type Worker struct {
 	Name             string
-	Schedule         func() time.Duration
+	Schedule         time.Duration
 	onTick           func()
 	quit             chan struct{}
 	wg               *sync.WaitGroup
@@ -25,7 +25,7 @@ type WorkerStatus struct {
 }
 
 // New creates a new worker with specified behavior
-func New(name string, schedule func() time.Duration, onTick func()) *Worker {
+func New(name string, schedule time.Duration, onTick func()) *Worker {
 	return &Worker{
 		Name:             name,
 		Schedule:         schedule,
@@ -53,7 +53,7 @@ func (w *Worker) Start() {
 
 	go func() {
 		for {
-			duration := w.Schedule()
+			duration := w.Schedule
 			w.mu.Lock()
 			w.nextRun = time.Now().Add(duration) // Set the next run time
 			w.mu.Unlock()

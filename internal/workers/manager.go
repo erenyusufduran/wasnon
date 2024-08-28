@@ -2,9 +2,6 @@ package workers
 
 import (
 	"log"
-
-	"github.com/erenyusufduran/wasnon/internal/repositories"
-	"gorm.io/gorm"
 )
 
 var workers = make(map[string]*Worker)
@@ -14,10 +11,8 @@ func Workers() map[string]*Worker {
 }
 
 // Initialize sets up the workers with necessary repositories
-func Initialize(db *gorm.DB, repositories *repositories.Repositories) {
-	configs := NewWorkerConfigs(repositories)
-
-	for _, config := range configs {
+func Initialize(workerConfigs []WorkerConfig) {
+	for _, config := range workerConfigs {
 		workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
 	}
 

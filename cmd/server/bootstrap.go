@@ -34,7 +34,8 @@ func Initialize() *App {
 	e := InitializeServer(db, repos)
 
 	// Initialize workers
-	workers.Initialize(db, repos)
+	configs := workers.NewWorkerConfigs(repos)
+	workers.Initialize(configs)
 
 	return &App{
 		DB:           db,
