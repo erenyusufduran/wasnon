@@ -81,7 +81,7 @@ func (h *ProductHandler) ApproveProduct(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to retrieve product"})
 	}
 
-	if product.Status != "waiting" {
+	if product.Status != models.Waiting {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Product is not at the waiting status"})
 	}
 
@@ -89,7 +89,7 @@ func (h *ProductHandler) ApproveProduct(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Product's expiration date is past."})
 	}
 
-	product.Status = "active"
+	product.Status = models.Active
 	if err := h.repo.Update(product); err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Error when updating"})
 	}

@@ -2,24 +2,20 @@ package workers
 
 import (
 	"log"
-	"sync"
 
 	"github.com/erenyusufduran/wasnon/internal/repositories"
 	"gorm.io/gorm"
 )
 
-var (
-	workers    = make(map[string]*Worker)
-	workerLock sync.Mutex
-)
+var workers = make(map[string]*Worker)
 
 func Workers() map[string]*Worker {
 	return workers
 }
 
 // Initialize sets up the workers with necessary repositories
-func Initialize(db *gorm.DB, productRepo repositories.ProductRepository) {
-	configs := NewWorkerConfigs(productRepo)
+func Initialize(db *gorm.DB, repositories *repositories.Repositories) {
+	configs := NewWorkerConfigs(repositories)
 
 	for _, config := range configs {
 		workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
@@ -30,9 +26,6 @@ func Initialize(db *gorm.DB, productRepo repositories.ProductRepository) {
 
 // StartWorker starts a worker by name
 func Start(name string) {
-	workerLock.Lock()
-	defer workerLock.Unlock()
-
 	worker, exists := workers[name]
 	if !exists {
 		log.Printf("Worker %s not found\n", name)
@@ -44,9 +37,6 @@ func Start(name string) {
 
 // StopWorker stops a worker by name
 func Stop(name string) {
-	workerLock.Lock()
-	defer workerLock.Unlock()
-
 	worker, exists := workers[name]
 	if !exists {
 		log.Printf("Worker %s not found\n", name)
@@ -62,8 +52,11 @@ func StartAll() {
 	}
 }
 
-func StopAll() {
+func StopAll(wait bool) {
 	for _, worker := range workers {
+		if wait {
+			worker.wg.Wait()
+		}
 		worker.Stop()
 	}
 }

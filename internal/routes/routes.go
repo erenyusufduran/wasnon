@@ -6,7 +6,11 @@ import (
 )
 
 // RegisterRoutes sets up the routes for the application
-func RegisterRoutes(e *echo.Echo, productHandler *handlers.ProductHandler, companyHandler *handlers.CompanyHandler, workerHandler *handlers.WorkerHandler) {
+func RegisterRoutes(
+	e *echo.Echo,
+	productHandler *handlers.ProductHandler,
+	companyHandler *handlers.CompanyHandler,
+	workerHandler *handlers.WorkerHandler) {
 	registerCompanyRoutes(e, companyHandler)
 	registerProductRoutes(e, productHandler)
 	registerWorkerRoutes(e, workerHandler)

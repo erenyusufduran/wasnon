@@ -26,11 +26,11 @@ func (h *WorkerHandler) StartWorker(c echo.Context) error {
 func (h *WorkerHandler) StopWorker(c echo.Context) error {
 	name := c.Param("name")
 	workers.Stop(name)
-	return c.JSON(http.StatusOK, echo.Map{"status": "Worker stopped", "worker": name})
+	return c.JSON(http.StatusOK, echo.Map{"status": "Worker will stop after task processing finish.", "worker": name})
 }
 
 func (h *WorkerHandler) CheckStatus(c echo.Context) error {
-	statuses := make(map[string]string)
+	statuses := make(map[string]workers.WorkerStatus)
 
 	for name, worker := range workers.Workers() {
 		statuses[name] = worker.Status()

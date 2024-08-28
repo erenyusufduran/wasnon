@@ -18,26 +18,25 @@ type WorkerConfig struct {
 func NewWorkerConfigs(repositories *repositories.Repositories) []WorkerConfig {
 	return []WorkerConfig{
 		{
-			Name: "product",
+			Name: "DisableExpiredProducts",
 			Schedule: func() time.Duration {
 				return schedule(15, time.Second)
 			},
 			OnTick: func() {
 				err := disableExpiredProducts(repositories.ProductRepository)
 				if err != nil {
-					fmt.Println("There is an error at disableExpiredProducts job")
+					fmt.Println("There is an error at DisableExpiredProducts job")
 				}
-				fmt.Println("Finished product scheduler")
 			},
 		},
 		{
-			Name: "log",
+			Name: "CleanupLogs",
 			Schedule: func() time.Duration {
 				return scheduleSpecificTime(12, 38)
 			}, OnTick: func() {
 				err := cleanupLogs()
 				if err != nil {
-					fmt.Println("There is an error at cleanupLogs job")
+					fmt.Println("There is an error at CleanupLogs job")
 				}
 			},
 		},
