@@ -3,7 +3,7 @@ package product
 import (
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/erenyusufduran/wasnon/shared"
 )
 
 // Status represents the status of a product
@@ -19,7 +19,7 @@ const (
 
 // Product represents a product in the system
 type Product struct {
-	gorm.Model
+	shared.CustomModel
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Price       float64   `json:"price"`

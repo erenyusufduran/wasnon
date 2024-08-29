@@ -1,11 +1,9 @@
 package employee
 
-import (
-	"gorm.io/gorm"
-)
+import "github.com/erenyusufduran/wasnon/shared"
 
 type Employee struct {
-	gorm.Model
+	shared.CustomModel
 	Name      string `json:"name"`
 	Email     string `json:"email"`
 	CompanyID uint   `json:"company_id"`

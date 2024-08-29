@@ -3,12 +3,11 @@ package company
 import (
 	"github.com/erenyusufduran/wasnon/internal/employee"
 	"github.com/erenyusufduran/wasnon/internal/product"
-
-	"gorm.io/gorm"
+	"github.com/erenyusufduran/wasnon/shared"
 )
 
 type Company struct {
-	gorm.Model
+	shared.CustomModel
 	Name      string              `json:"name"`
 	Employees []employee.Employee `json:"employees"`
 	Products  []product.Product   `json:"products"`
