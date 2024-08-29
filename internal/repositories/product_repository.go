@@ -13,7 +13,7 @@ type ProductRepository interface {
 	GetAll(limit int) ([]models.Product, error)
 	GetOneById(id uint) (*models.Product, error) // Use a pointer to allow modifications
 	GetActiveExpiredProducts(currentTime time.Time, limit int) ([]*models.Product, error)
-	UpdateProductsStatus(products []*models.Product, status string) error
+	UpdateProductsStatus(products []*models.Product, status models.Status) error
 }
 
 // ProductRepositoryImpl is a concrete implementation of ProductRepository using Gorm
@@ -59,7 +59,7 @@ func (r *ProductRepositoryImpl) GetActiveExpiredProducts(currentTime time.Time, 
 	return expiredProducts, err
 }
 
-func (r *ProductRepositoryImpl) UpdateProductsStatus(products []*models.Product, status string) error {
+func (r *ProductRepositoryImpl) UpdateProductsStatus(products []*models.Product, status models.Status) error {
 	productIds := make([]uint, len(products))
 	for i, product := range products {
 		productIds[i] = product.ID

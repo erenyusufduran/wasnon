@@ -39,13 +39,12 @@ func New(name string, schedule time.Duration, onTick func()) *Worker {
 }
 
 // Start begins the worker's task loop
-func (w *Worker) Start() {
+func (w *Worker) Start() error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
 	if w.isRunning {
-		fmt.Printf("Worker %s is already running\n", w.Name)
-		return
+		return fmt.Errorf("worker %s is already running", w.Name)
 	}
 
 	w.isRunning = true
@@ -58,15 +57,12 @@ func (w *Worker) Start() {
 			w.nextRun = time.Now().Add(duration) // Set the next run time
 			w.mu.Unlock()
 
-			fmt.Printf("Worker %s will start in %v at %v\n", w.Name, duration, w.nextRun)
-
 			select {
 			case <-time.After(duration):
 				w.mu.Lock()
 
 				if w.isTaskProcessing {
 					w.mu.Unlock()
-					fmt.Printf("Worker %s is still processing the previous task\n", w.Name)
 					continue
 				}
 
@@ -94,16 +90,17 @@ func (w *Worker) Start() {
 			}
 		}
 	}()
+
+	return nil
 }
 
 // Stop signals the worker to stop and waits for all tasks to complete
-func (w *Worker) Stop() {
+func (w *Worker) Stop() error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
 	if !w.isRunning {
-		fmt.Printf("Worker %s is not running\n", w.Name)
-		return
+		return fmt.Errorf("worker %s is not running", w.Name)
 	}
 
 	if w.quit != nil {
@@ -116,6 +113,8 @@ func (w *Worker) Stop() {
 		w.nextRun = time.Time{}
 		fmt.Printf("Worker %s stopped\n", w.Name)
 	}()
+
+	return nil
 }
 
 func (w *Worker) Status() WorkerStatus {

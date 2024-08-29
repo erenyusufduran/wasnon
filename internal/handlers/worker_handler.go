@@ -18,15 +18,22 @@ func NewWorkerHandler() *WorkerHandler {
 // StartWorker starts a worker by name
 func (h *WorkerHandler) StartWorker(c echo.Context) error {
 	name := c.Param("name")
-	workers.Start(name)
-	return c.JSON(http.StatusOK, echo.Map{"status": "Worker started", "worker": name})
+	err := workers.Start(name)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"worker": name, "error": err.Error()})
+
+	}
+	return c.JSON(http.StatusOK, echo.Map{"worker": name, "message": "Worker started"})
 }
 
 // StopWorker stops a worker by name
 func (h *WorkerHandler) StopWorker(c echo.Context) error {
 	name := c.Param("name")
-	workers.Stop(name)
-	return c.JSON(http.StatusOK, echo.Map{"status": "Worker will stop after task processing finish.", "worker": name})
+	err := workers.Stop(name)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"worker": name, "error": err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{"worker": name, "message": "Worker will stop after task processing finish."})
 }
 
 func (h *WorkerHandler) CheckStatus(c echo.Context) error {

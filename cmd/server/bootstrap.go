@@ -20,7 +20,7 @@ type App struct {
 }
 
 // Initialize bootstraps the application
-func Initialize() *App {
+func Initialize() (*App, error) {
 	// Load configuration
 	config.Load()
 
@@ -35,13 +35,16 @@ func Initialize() *App {
 
 	// Initialize workers
 	configs := workers.NewWorkerConfigs(repos)
-	workers.Initialize(configs)
+	err := workers.Initialize(configs)
+	if err != nil {
+		return &App{}, err
+	}
 
 	return &App{
 		DB:           db,
 		Server:       e,
 		Repositories: repos,
-	}
+	}, nil
 }
 
 // StartServer starts the Echo server

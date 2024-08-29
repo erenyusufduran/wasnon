@@ -11,7 +11,10 @@ import (
 // go run ./cmd/server
 func main() {
 	// Initialize the application components
-	app := Initialize()
+	app, err := Initialize()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Start the server in a separate goroutine to catch gracefully shutdown
 	go func() {

@@ -1,7 +1,7 @@
 package workers
 
 import (
-	"log"
+	"fmt"
 )
 
 var workers = make(map[string]*Worker)
@@ -11,47 +11,53 @@ func Workers() map[string]*Worker {
 }
 
 // Initialize sets up the workers with necessary repositories
-func Initialize(workerConfigs []WorkerConfig) {
+func Initialize(workerConfigs []WorkerConfig) error {
 	for _, config := range workerConfigs {
 		workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
 	}
 
-	StartAll()
+	return StartAll()
 }
 
 // StartWorker starts a worker by name
-func Start(name string) {
+func Start(name string) error {
 	worker, exists := workers[name]
 	if !exists {
-		log.Printf("Worker %s not found\n", name)
-		return
+		return fmt.Errorf("worker %s not found", name)
 	}
 
-	worker.Start()
+	return worker.Start()
 }
 
 // StopWorker stops a worker by name
-func Stop(name string) {
+func Stop(name string) error {
 	worker, exists := workers[name]
 	if !exists {
-		log.Printf("Worker %s not found\n", name)
-		return
+		return fmt.Errorf("worker %s not found", name)
 	}
 
-	worker.Stop()
+	return worker.Stop()
 }
 
-func StartAll() {
+func StartAll() error {
 	for _, worker := range workers {
-		worker.Start()
+		err := worker.Start()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func StopAll(wait bool) {
+func StopAll(wait bool) error {
 	for _, worker := range workers {
 		if wait {
 			worker.wg.Wait()
 		}
-		worker.Stop()
+		err := worker.Stop()
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }

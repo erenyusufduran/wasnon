@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/erenyusufduran/wasnon/internal/models"
 	"github.com/erenyusufduran/wasnon/internal/repositories"
 )
 
@@ -16,7 +17,7 @@ func disableExpiredProducts(repo repositories.ProductRepository) error {
 		return err
 	}
 
-	err = repo.UpdateProductsStatus(products, "past")
+	err = repo.UpdateProductsStatus(products, models.Past)
 	if err != nil {
 		return err
 	}
