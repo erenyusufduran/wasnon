@@ -1,4 +1,4 @@
-package dto
+package product
 
 // CreateProductRequest defines the input structure for creating a product
 type CreateProductRequest struct {

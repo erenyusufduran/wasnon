@@ -1,19 +1,23 @@
-package workers
+package worker
 
 import (
 	"fmt"
+	"time"
 )
 
-var workers = make(map[string]*Worker)
+var Workers = make(map[string]*Worker)
 
-func Workers() map[string]*Worker {
-	return workers
+// WorkerConfig holds the configuration for a worker
+type WorkerConfig struct {
+	Name     string
+	Schedule time.Duration
+	OnTick   func()
 }
 
 // Initialize sets up the workers with necessary repositories
 func Initialize(workerConfigs []WorkerConfig) error {
 	for _, config := range workerConfigs {
-		workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
+		Workers[config.Name] = New(config.Name, config.Schedule, config.OnTick)
 	}
 
 	return StartAll()
@@ -21,7 +25,7 @@ func Initialize(workerConfigs []WorkerConfig) error {
 
 // StartWorker starts a worker by name
 func Start(name string) error {
-	worker, exists := workers[name]
+	worker, exists := Workers[name]
 	if !exists {
 		return fmt.Errorf("worker %s not found", name)
 	}
@@ -31,7 +35,7 @@ func Start(name string) error {
 
 // StopWorker stops a worker by name
 func Stop(name string) error {
-	worker, exists := workers[name]
+	worker, exists := Workers[name]
 	if !exists {
 		return fmt.Errorf("worker %s not found", name)
 	}
@@ -40,7 +44,7 @@ func Stop(name string) error {
 }
 
 func StartAll() error {
-	for _, worker := range workers {
+	for _, worker := range Workers {
 		err := worker.Start()
 		if err != nil {
 			return err
@@ -50,7 +54,7 @@ func StartAll() error {
 }
 
 func StopAll(wait bool) error {
-	for _, worker := range workers {
+	for _, worker := range Workers {
 		if wait {
 			worker.wg.Wait()
 		}

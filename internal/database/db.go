@@ -5,7 +5,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/erenyusufduran/wasnon/internal/models"
+	"github.com/erenyusufduran/wasnon/internal/company"
+	"github.com/erenyusufduran/wasnon/internal/employee"
+	"github.com/erenyusufduran/wasnon/internal/product"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -33,7 +35,7 @@ func Init() *gorm.DB {
 	}
 
 	// Migrate the schema
-	if err := db.AutoMigrate(&models.Company{}, &models.Employee{}, &models.Product{}); err != nil {
+	if err := db.AutoMigrate(&company.Company{}, &employee.Employee{}, &product.Product{}); err != nil {
 		log.Fatalf("Failed to migrate database schema: %v", err)
 	}
 

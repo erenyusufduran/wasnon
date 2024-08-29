@@ -1,13 +1,12 @@
-package repositories
+package company
 
 import (
-	"github.com/erenyusufduran/wasnon/internal/models"
 	"gorm.io/gorm"
 )
 
 type CompanyRepository interface {
-	Create(product *models.Company) error
-	GetAll() ([]models.Company, error)
+	Create(product *Company) error
+	GetAll() ([]Company, error)
 }
 
 type CompanyRepositoryImpl struct {
@@ -18,12 +17,12 @@ func NewCompanyRepositoryImpl(db *gorm.DB) *CompanyRepositoryImpl {
 	return &CompanyRepositoryImpl{db: db}
 }
 
-func (r *CompanyRepositoryImpl) Create(company *models.Company) error {
+func (r *CompanyRepositoryImpl) Create(company *Company) error {
 	return r.db.Create(company).Error
 }
 
-func (r *CompanyRepositoryImpl) GetAll() ([]models.Company, error) {
-	var companies []models.Company
+func (r *CompanyRepositoryImpl) GetAll() ([]Company, error) {
+	var companies []Company
 	err := r.db.Preload("Employees").Preload("Products").Find(&companies).Error
 	return companies, err
 }

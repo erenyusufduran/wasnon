@@ -1,4 +1,4 @@
-package models
+package employee
 
 import (
 	"gorm.io/gorm"

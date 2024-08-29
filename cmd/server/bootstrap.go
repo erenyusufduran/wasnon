@@ -7,8 +7,7 @@ import (
 
 	"github.com/erenyusufduran/wasnon/internal/config"
 	"github.com/erenyusufduran/wasnon/internal/database"
-	"github.com/erenyusufduran/wasnon/internal/repositories"
-	"github.com/erenyusufduran/wasnon/internal/workers"
+	"github.com/erenyusufduran/wasnon/pkg/worker"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -16,7 +15,7 @@ import (
 type App struct {
 	DB           *gorm.DB
 	Server       *echo.Echo
-	Repositories *repositories.Repositories
+	Repositories *Repositories
 }
 
 // Initialize bootstraps the application
@@ -28,14 +27,15 @@ func Initialize() (*App, error) {
 	db := database.Init()
 
 	// Initialize repositories
-	repos := repositories.New(db)
+	repos := NewRepositories(db)
 
 	// Initialize the server
 	e := InitializeServer(db, repos)
 
 	// Initialize workers
-	configs := workers.NewWorkerConfigs(repos)
-	err := workers.Initialize(configs)
+	configs := NewWorkerConfigs(repos)
+	err := worker.Initialize(configs)
+
 	if err != nil {
 		return &App{}, err
 	}
@@ -58,7 +58,7 @@ func (app *App) StartServer() error {
 
 // Shutdown handles the graceful shutdown of the application
 func (app *App) Shutdown() {
-	workers.StopAll(true)
+	worker.StopAll(true)
 
 	if err := app.Server.Shutdown(context.Background()); err != nil {
 		log.Fatal("Server forced to shutdown:", err)

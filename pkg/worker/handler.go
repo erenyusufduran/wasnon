@@ -1,9 +1,8 @@
-package handlers
+package worker
 
 import (
 	"net/http"
 
-	"github.com/erenyusufduran/wasnon/internal/workers"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +17,7 @@ func NewWorkerHandler() *WorkerHandler {
 // StartWorker starts a worker by name
 func (h *WorkerHandler) StartWorker(c echo.Context) error {
 	name := c.Param("name")
-	err := workers.Start(name)
+	err := Start(name)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"worker": name, "error": err.Error()})
 
@@ -29,7 +28,7 @@ func (h *WorkerHandler) StartWorker(c echo.Context) error {
 // StopWorker stops a worker by name
 func (h *WorkerHandler) StopWorker(c echo.Context) error {
 	name := c.Param("name")
-	err := workers.Stop(name)
+	err := Stop(name)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, echo.Map{"worker": name, "error": err.Error()})
 	}
@@ -37,9 +36,9 @@ func (h *WorkerHandler) StopWorker(c echo.Context) error {
 }
 
 func (h *WorkerHandler) CheckStatus(c echo.Context) error {
-	statuses := make(map[string]workers.WorkerStatus)
+	statuses := make(map[string]WorkerStatus)
 
-	for name, worker := range workers.Workers() {
+	for name, worker := range Workers {
 		statuses[name] = worker.Status()
 	}
 
