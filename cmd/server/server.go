@@ -3,45 +3,30 @@ package main
 import (
 	"net/http"
 
+	"github.com/erenyusufduran/wasnon/internal/branch"
 	"github.com/erenyusufduran/wasnon/internal/company"
 	"github.com/erenyusufduran/wasnon/internal/product"
 	"github.com/erenyusufduran/wasnon/pkg/worker"
+	"github.com/erenyusufduran/wasnon/shared/validator"
 	"github.com/labstack/echo/v4"
-
-	"gorm.io/gorm"
 )
 
 // Initialize creates and configures an Echo instance with routes
-func InitializeServer(db *gorm.DB, repositories *Repositories) *echo.Echo {
+func InitializeServer(repositories *Repositories) *echo.Echo {
 	e := echo.New()
+	e.Validator = validator.New()
 
 	// Initialize handlers
 	productHandler := product.NewProductHandler(repositories.ProductRepository)
 	companyHandler := company.NewCompanyHandler(repositories.CompanyRepository)
+	branchHandler := branch.NewBranchHandler(repositories.BranchRepository)
 
-	registerRoutes(e, productHandler, companyHandler)
+	product.RegisterRoutes(e, productHandler)
+	company.RegisterRoutes(e, companyHandler)
+	branch.RegisterRoutes(e, branchHandler)
+	registerWorkerRoutes(e)
 
 	return e
-}
-
-// registerRoutes sets up the routes for the application
-func registerRoutes(
-	e *echo.Echo,
-	productHandler *product.ProductHandler,
-	companyHandler *company.CompanyHandler) {
-	registerCompanyRoutes(e, companyHandler)
-	registerProductRoutes(e, productHandler)
-	registerWorkerRoutes(e)
-}
-
-func registerCompanyRoutes(e *echo.Echo, companyHandler *company.CompanyHandler) {
-	e.POST("/companies", companyHandler.CreateCompany)
-	e.GET("/companies", companyHandler.ListCompanies)
-}
-
-func registerProductRoutes(e *echo.Echo, productHandler *product.ProductHandler) {
-	e.POST("/products", productHandler.CreateProduct)
-	e.GET("/products", productHandler.ListProducts)
 }
 
 func registerWorkerRoutes(e *echo.Echo) {

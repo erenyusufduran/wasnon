@@ -1,21 +1,19 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
-	"github.com/erenyusufduran/wasnon/internal/company"
-	"github.com/erenyusufduran/wasnon/internal/employee"
-	"github.com/erenyusufduran/wasnon/internal/product"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var db *gorm.DB
+var db *pgxpool.Pool
 
 // Init initializes the database connection
-func Init() *gorm.DB {
+func Init() *pgxpool.Pool {
 	// Retrieve database connection details from environment variables
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -26,31 +24,32 @@ func Init() *gorm.DB {
 	// Construct the PostgreSQL DSN (Data Source Name)
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
-
-	var err error
-	// Connect to PostgreSQL database using Gorm
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	config, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to the database: %v", err)
+		log.Fatalf("Unable to parse config: %v", err)
 	}
 
-	// Migrate the schema
-	if err := db.AutoMigrate(&company.Company{}, &employee.Employee{}, &product.Product{}); err != nil {
-		log.Fatalf("Failed to migrate database schema: %v", err)
+	config.MaxConns = 10
+	config.MinConns = 5
+	config.MaxConnLifetime = time.Hour
+
+	db, err = pgxpool.New(context.Background(), config.ConnString())
+	if err != nil {
+		log.Fatalf("Unable to create connection pool: %v", err)
 	}
 
-	log.Println("Database connection successfully established and models migrated")
+	err = runMigrations(db)
+	if err != nil {
+		log.Fatalf("Unable to do migrations: %v", err)
+	}
+
+	log.Println("Database connection successfully established")
 	return db
 }
 
 func Close() {
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatal("Error retrieving SQL database instance:", err)
+	if db != nil {
+		db.Close()
+		log.Println("Database connection closed")
 	}
-	if err := sqlDB.Close(); err != nil {
-		log.Fatal("Error closing database connection:", err)
-	}
-
-	log.Println("Database connection closed")
 }

@@ -1,22 +1,22 @@
 package main
 
 import (
+	"github.com/erenyusufduran/wasnon/internal/branch"
 	"github.com/erenyusufduran/wasnon/internal/company"
-	"github.com/erenyusufduran/wasnon/internal/employee"
 	"github.com/erenyusufduran/wasnon/internal/product"
-	"gorm.io/gorm"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repositories struct {
-	EmployeeRepository employee.EmployeeRepository
-	CompanyRepository  company.CompanyRepository
-	ProductRepository  product.ProductRepository
+	CompanyRepository company.CompanyRepository
+	ProductRepository product.ProductRepository
+	BranchRepository  branch.BranchRepository
 }
 
-func NewRepositories(db *gorm.DB) *Repositories {
+func NewRepositories(db *pgxpool.Pool) *Repositories {
 	return &Repositories{
-		EmployeeRepository: employee.NewEmployeeRepositoryImpl(db),
-		CompanyRepository:  company.NewCompanyRepositoryImpl(db),
-		ProductRepository:  product.NewProductRepositoryImpl(db),
+		CompanyRepository: company.NewCompanyRepositoryImpl(db),
+		ProductRepository: product.NewProductRepositoryImpl(db),
+		BranchRepository:  branch.NewBranchRepositoryImpl(db),
 	}
 }

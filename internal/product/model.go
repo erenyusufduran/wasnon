@@ -2,8 +2,6 @@ package product
 
 import (
 	"time"
-
-	"github.com/erenyusufduran/wasnon/shared"
 )
 
 // Status represents the status of a product
@@ -19,7 +17,7 @@ const (
 
 // Product represents a product in the system
 type Product struct {
-	shared.CustomModel
+	ID          uint      `json:"-"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Price       float64   `json:"price"`

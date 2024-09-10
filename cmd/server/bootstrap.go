@@ -8,12 +8,12 @@ import (
 	"github.com/erenyusufduran/wasnon/internal/config"
 	"github.com/erenyusufduran/wasnon/internal/database"
 	"github.com/erenyusufduran/wasnon/pkg/worker"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
 type App struct {
-	DB           *gorm.DB
+	DB           *pgxpool.Pool
 	Server       *echo.Echo
 	Repositories *Repositories
 }
@@ -30,7 +30,7 @@ func Initialize() (*App, error) {
 	repos := NewRepositories(db)
 
 	// Initialize the server
-	e := InitializeServer(db, repos)
+	e := InitializeServer(repos)
 
 	// Initialize workers
 	configs := NewWorkerConfigs(repos)

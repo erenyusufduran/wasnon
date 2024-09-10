@@ -1,16 +1,13 @@
 package company
 
 import (
-	"github.com/erenyusufduran/wasnon/internal/employee"
-	"github.com/erenyusufduran/wasnon/internal/product"
-	"github.com/erenyusufduran/wasnon/shared"
+	"github.com/erenyusufduran/wasnon/internal/branch"
 )
 
 type Company struct {
-	shared.CustomModel
-	Name      string              `json:"name"`
-	Employees []employee.Employee `json:"employees"`
-	Products  []product.Product   `json:"products"`
+	ID       uint
+	Name     string          `json:"name"`
+	Branches []branch.Branch `json:"branches"`
 }
 
 func NewCompanyWithName(name string) *Company {
@@ -19,10 +16,9 @@ func NewCompanyWithName(name string) *Company {
 	}
 }
 
-func NewCompany(name string, employees []employee.Employee, products []product.Product) *Company {
+func NewCompany(name string, branches []branch.Branch) *Company {
 	return &Company{
-		Name:      name,
-		Employees: employees,
-		Products:  products,
+		Name:     name,
+		Branches: branches,
 	}
 }

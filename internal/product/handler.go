@@ -23,6 +23,10 @@ func (h *ProductHandler) CreateProduct(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
 	}
 
+	if err := c.Validate(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
 	// Parse the expiration date
 	expiration, err := time.Parse("2006-01-02", req.Expiration)
 	if err != nil {
@@ -46,21 +50,7 @@ func (h *ProductHandler) ListProducts(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 	}
 
-	// Prepare response
-	response := make([]echo.Map, len(products))
-	for i, product := range products {
-		response[i] = echo.Map{
-			"id":          product.ID,
-			"name":        product.Name,
-			"description": product.Description,
-			"price":       product.Price,
-			"expiration":  product.Expiration.Format("2006-01-02"),
-			"company_id":  product.CompanyID,
-			"status":      product.Status,
-		}
-	}
-
-	return c.JSON(http.StatusOK, response)
+	return c.JSON(http.StatusOK, products)
 }
 
 // ListProducts retrieves all products and returns them as a JSON array
