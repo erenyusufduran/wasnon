@@ -37,3 +37,12 @@ func (h *CompanyHandler) ListCompanies(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, companies)
 }
+
+func (h *CompanyHandler) ListCompaniesWithBranches(c echo.Context) error {
+	companies, err := h.repo.GetManyWithBranches()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, companies)
+}

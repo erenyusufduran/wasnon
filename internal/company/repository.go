@@ -4,12 +4,15 @@ import (
 	"context"
 
 	"github.com/erenyusufduran/wasnon/internal/branch"
+	"github.com/erenyusufduran/wasnon/shared/stringpkg"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type CompanyRepository interface {
 	Create(product *Company) error
 	GetAll() ([]Company, error)
+	GetManyWithBranches() ([]CompanyWithBranches, error)
 }
 
 type CompanyRepositoryImpl struct {
@@ -31,6 +34,28 @@ func (r *CompanyRepositoryImpl) Create(company *Company) error {
 }
 
 func (r *CompanyRepositoryImpl) GetAll() ([]Company, error) {
+	query := `SELECT * FROM companies`
+	rows, err := r.db.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return pgx.CollectRows(rows, pgx.RowToStructByName[Company])
+
+	// var branches []Branch
+	// for rows.Next() {
+	// 	var branch Branch
+	// 	err := rows.Scan(&branch.ID, &branch.Name, &branch.Email, &branch.CompanyID)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	branches = append(branches, branch)
+	// }
+	// return branches, nil
+}
+
+func (r *CompanyRepositoryImpl) GetManyWithBranches() ([]CompanyWithBranches, error) {
 	query := `
 		SELECT 
 			c.id AS company_id, 
@@ -52,7 +77,7 @@ func (r *CompanyRepositoryImpl) GetAll() ([]Company, error) {
 	}
 	defer rows.Close()
 
-	companyMap := make(map[uint]*Company)
+	companyMap := make(map[uint]*CompanyWithBranches)
 	for rows.Next() {
 		var companyID uint
 		var branchID *uint
@@ -69,9 +94,9 @@ func (r *CompanyRepositoryImpl) GetAll() ([]Company, error) {
 
 		// If the company is not yet added, create it
 		if _, exists := companyMap[companyID]; !exists {
-			companyMap[companyID] = &Company{
+			companyMap[companyID] = &CompanyWithBranches{
 				ID:       companyID,
-				Name:     nullableString(companyName),
+				Name:     stringpkg.NullableString(companyName),
 				Branches: []branch.Branch{},
 			}
 		}
@@ -81,27 +106,20 @@ func (r *CompanyRepositoryImpl) GetAll() ([]Company, error) {
 			companyMap[companyID].Branches = append(companyMap[companyID].Branches, branch.Branch{
 				ID:        *branchID,
 				CompanyID: companyID,
-				Name:      nullableString(name),
-				Email:     nullableString(email),
-				Address:   nullableString(address),
-				City:      nullableString(city),
-				County:    nullableString(county),
+				Name:      stringpkg.NullableString(name),
+				Email:     stringpkg.NullableString(email),
+				Address:   stringpkg.NullableString(address),
+				City:      stringpkg.NullableString(city),
+				County:    stringpkg.NullableString(county),
 			})
 		}
 	}
 
 	// Convert the map to a slice of companies
-	var companies []Company
+	var companies []CompanyWithBranches
 	for _, company := range companyMap {
 		companies = append(companies, *company)
 	}
 
 	return companies, nil
-}
-
-func nullableString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
 }

@@ -5,9 +5,8 @@ import (
 )
 
 type Company struct {
-	ID       uint
-	Name     string          `json:"name"`
-	Branches []branch.Branch `json:"branches"`
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 func NewCompanyWithName(name string) *Company {
@@ -18,7 +17,6 @@ func NewCompanyWithName(name string) *Company {
 
 func NewCompany(name string, branches []branch.Branch) *Company {
 	return &Company{
-		Name:     name,
-		Branches: branches,
+		Name: name,
 	}
 }
